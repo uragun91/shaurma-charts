@@ -5,3 +5,7 @@ interface IShaurmaOptions {
 interface IChart {
   a: string
 }
+
+interface IDrawableObject {
+  draw: (ctx: CanvasRenderingContext2D) => void
+}

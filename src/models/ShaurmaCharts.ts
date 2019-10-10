@@ -1,3 +1,5 @@
+import { LinearChart } from "./LinearChart";
+
 export class ShaurmaCharts {
   private readonly chartsCanvasId = 'shaurma-charts-charts-canvas'
   private readonly frameCanvasId = 'shaurma-charts-frame-canvas'
@@ -13,6 +15,8 @@ export class ShaurmaCharts {
 
   private left: number
   private right: number
+
+  private drawableObjects: IDrawableObject[] = []
 
   constructor(
     private wrapperElement: HTMLElement,
@@ -47,6 +51,9 @@ export class ShaurmaCharts {
     this.frame.style.left = '50px'
     this.frame.style.width = '25%'
     this.calculateEdges()
+
+    this.chartsCtx.translate(0, _options.height || 300)
+    this.chartsCtx.scale(1, -1)
 
     document.addEventListener('mousedown', (event: MouseEvent) => {
       this.mousedownEventTarget = event.target as HTMLElement
@@ -93,14 +100,23 @@ export class ShaurmaCharts {
           this.calculateEdges()
         }
       } else {
-        this.mousedownEventTarget = null // detach the element. This is for the case when we made mouseup outside the dociment (e.g. browser window)
+        this.mousedownEventTarget = null // detach the element. This is for the case when we made mouseup outside the document (e.g. browser window)
       }
     })
 
   }
 
-  public addChart(chart: IChart) {
+  public draw(): void {
+    for (const drawableObj of this.drawableObjects) {
+      drawableObj.draw(this.frameCtx)
+    }
+    window.requestAnimationFrame(this.draw)
+  }
 
+  public addChart(points: {x: number, y: number}[], color: string) {
+    const chart = new LinearChart(points, color, 500, 300)
+    this.drawableObjects.push(chart)
+    chart.draw(this.chartsCtx)
   }
 
   private calculateEdges(): void {
