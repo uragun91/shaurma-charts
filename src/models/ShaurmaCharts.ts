@@ -1,4 +1,5 @@
 import { LinearChart } from "./LinearChart";
+import { LinearDrawer } from "./LinearDrawer";
 
 export class ShaurmaCharts {
   private readonly chartsCanvasId = 'shaurma-charts-charts-canvas'
@@ -16,7 +17,7 @@ export class ShaurmaCharts {
   private left: number
   private right: number
 
-  private drawableObjects: IDrawableObject[] = []
+  private linearDrawer: LinearDrawer
 
   private defaults: IShaurmaOptions = {
     width: 500,
@@ -47,10 +48,13 @@ export class ShaurmaCharts {
       </div>
     `
     const chartsElement: HTMLCanvasElement = document.getElementById(this.chartsCanvasId) as HTMLCanvasElement
-    this.chartsCtx = chartsElement.getContext('2d')
+    this.chartsCtx = chartsElement.getContext('2d');
+    document.querySelectorAll('.shaurma-charts-charts-wrapper, .shaurma-charts-frame-editor').forEach((el: HTMLElement) => {
+      el.style.width = `${this.options.width}px`
+    })
+
     const frameElement: HTMLCanvasElement = document.getElementById(this.frameCanvasId) as HTMLCanvasElement
     this.frameCtx = frameElement.getContext('2d')
-
     this.leftCurtain = document.querySelector('.shaurma-charts-frame-left-control')
     this.rightCurtain = document.querySelector('.shaurma-charts-frame-right-control')
     this.frame = document.querySelector('.shaurma-charts-frame')
@@ -112,19 +116,12 @@ export class ShaurmaCharts {
       }
     })
 
-  }
-
-  public draw(): void {
-    for (const drawableObj of this.drawableObjects) {
-      drawableObj.draw(this.frameCtx)
-    }
-    window.requestAnimationFrame(this.draw)
+    this.linearDrawer = new LinearDrawer(this.chartsCtx, this.options.width, this.options.height)
   }
 
   public addChart(points: {x: number, y: number}[], color: string) {
-    const chart = new LinearChart(points, color, 500, 300)
-    this.drawableObjects.push(chart)
-    chart.draw(this.chartsCtx)
+    const chart = new LinearChart(points, color)
+    this.linearDrawer.addChart(chart)
   }
 
   private calculateEdges(): void {
