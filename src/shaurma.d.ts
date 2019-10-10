@@ -1,4 +1,6 @@
 interface IShaurmaOptions {
+  width: number,
+  height: number,
   [key: string]: any
 }
 

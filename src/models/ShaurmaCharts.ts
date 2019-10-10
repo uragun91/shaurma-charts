@@ -18,15 +18,23 @@ export class ShaurmaCharts {
 
   private drawableObjects: IDrawableObject[] = []
 
+  private defaults: IShaurmaOptions = {
+    width: 500,
+    height: 300
+  }
+  private options: IShaurmaOptions = {} as IShaurmaOptions
+
   constructor(
     private wrapperElement: HTMLElement,
-    private options?: IShaurmaOptions
+    options?: Partial<IShaurmaOptions>
   ) {
-    const _options = this.options || {}
+    for (const key of Object.keys(this.defaults)) {
+      this.options[key] = options ? options[key] || this.defaults[key] : this.defaults[key]
+    }
 
     wrapperElement.innerHTML = `
       <div class="shaurma-charts-charts-wrapper">
-        <canvas id="${this.chartsCanvasId}" width="${_options.width || 500}" height="${_options.height || 300}"></canvas>
+        <canvas id="${this.chartsCanvasId}" width="${this.options.width}" height="${this.options.height}"></canvas>
       </div>
       <div class="shaurma-charts-frame-editor">
         <div class="shaurma-charts-frame-wrapper">
@@ -35,7 +43,7 @@ export class ShaurmaCharts {
             <div class="shaurma-charts-frame-right-control"></div>
           </div>
         </div>
-        <canvas id="${this.frameCanvasId}" width="${_options.width || 500}" height="100"></canvas>
+        <canvas id="${this.frameCanvasId}" width="${this.options.width}" height="100"></canvas>
       </div>
     `
     const chartsElement: HTMLCanvasElement = document.getElementById(this.chartsCanvasId) as HTMLCanvasElement
@@ -52,7 +60,7 @@ export class ShaurmaCharts {
     this.frame.style.width = '25%'
     this.calculateEdges()
 
-    this.chartsCtx.translate(0, _options.height || 300)
+    this.chartsCtx.translate(0, this.options.height)
     this.chartsCtx.scale(1, -1)
 
     document.addEventListener('mousedown', (event: MouseEvent) => {
