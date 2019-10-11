@@ -11,3 +11,8 @@ interface IChart {
 interface IDrawableObject {
   draw: (ctx: CanvasRenderingContext2D) => void
 }
+
+interface IPoint {
+  x: number,
+  y: number
+}
