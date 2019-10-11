@@ -7,14 +7,14 @@ export class LinearChart implements IDrawableObject {
   public yMin: number
 
   constructor(
-    public points: {x: number, y: number}[],
+    public points: IPoint[],
     private color: string = 'green'
   ) {}
 
   public draw(ctx: CanvasRenderingContext2D): void {
     ctx.beginPath()
     ctx.strokeStyle = this.color
-    this.points.forEach((point: {x: number, y: number}, index: number) => {
+    this.points.forEach((point: IPoint, index: number) => {
       const x = (point.x - this.xMin) * this.coefX
       const y = (point.y - this.yMin) * this.coefY
       // draw

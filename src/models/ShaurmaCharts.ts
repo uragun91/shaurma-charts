@@ -120,7 +120,7 @@ export class ShaurmaCharts {
     this.linearDrawer = new LinearDrawer(this.chartsCtx, this.options.width, this.options.height, this.left, this.right)
   }
 
-  public addChart(points: {x: number, y: number}[], color: string) {
+  public addChart(points: IPoint[], color: string) {
     const chart = new LinearChart(points, color)
     this.linearDrawer.addChart(chart)
   }
