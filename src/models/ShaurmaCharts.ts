@@ -110,13 +110,14 @@ export class ShaurmaCharts {
           this.frame.style.width = `${newFrameWidth}px`
 
           this.calculateEdges()
+          this.linearDrawer.updateBorders(this.left, this.right)
         }
       } else {
         this.mousedownEventTarget = null // detach the element. This is for the case when we made mouseup outside the document (e.g. browser window)
       }
     })
 
-    this.linearDrawer = new LinearDrawer(this.chartsCtx, this.options.width, this.options.height)
+    this.linearDrawer = new LinearDrawer(this.chartsCtx, this.options.width, this.options.height, this.left, this.right)
   }
 
   public addChart(points: {x: number, y: number}[], color: string) {
