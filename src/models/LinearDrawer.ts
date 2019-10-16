@@ -1,4 +1,5 @@
 import { LinearChart } from "./LinearChart";
+import { Animation } from "./Animation";
 
 export class LinearDrawer {
   public linearCharts: LinearChart[] = []
@@ -11,13 +12,18 @@ export class LinearDrawer {
   private coefX: number
   private coefY: number
 
+  private frameXMin: number
+
+  private yMaxAnimation: Animation = null
+  private yMinAnimation: Animation = null
+
   constructor(
     private ctx: CanvasRenderingContext2D,
     private width: number,
     private height: number,
     private left: number,
     private right: number
-  ) {}
+  ) { }
 
   addChart(chart: LinearChart) {
     this.linearCharts.push(chart)
@@ -31,8 +37,6 @@ export class LinearDrawer {
   }
 
   private drawAll() {
-    this.ctx.clearRect(0, 0, this.width, this.height)
-
     // x
     this.xMin = Math.min(...this.linearCharts.map((chart: LinearChart) => Math.min(...chart.points.map(val => val.x))))
     this.xMax = Math.max(...this.linearCharts.map((chart: LinearChart) => Math.max(...chart.points.map(val => val.x))))
@@ -40,7 +44,9 @@ export class LinearDrawer {
 
     const frameXMin = this.xMin + this.left / this.width * pointsXAxisLength
     const frameXMax = this.xMin + this.right / this.width * pointsXAxisLength
+    this.frameXMin = frameXMin
 
+    this.coefX = this.width / Math.abs(frameXMax - frameXMin)
 
     // y
     const stripedChartsPoints: IPoint[][] = this.linearCharts.map((chart: LinearChart) => {
@@ -51,6 +57,8 @@ export class LinearDrawer {
           if (currPoint.x >= frameXMin && currPoint.x <= frameXMax) {
             filtered.push(currPoint)
           } else if (prevPoint && currPoint.x - prevPoint.x >= frameXMax - frameXMin) {
+            // this is for the case when frame borders are between 2 points. We just push those points
+            filtered.push(prevPoint)
             filtered.push(currPoint)
           }
           return currPoint
@@ -60,19 +68,48 @@ export class LinearDrawer {
 
       return filtered
     })
-    this.yMin = Math.min(...stripedChartsPoints.map((points: IPoint[]) => Math.min(...points.map(val => val.y))))
-    this.yMax = Math.max(...stripedChartsPoints.map((points: IPoint[]) => Math.max(...points.map(val => val.y))))
+
+    const yMin = Math.min(...stripedChartsPoints.map((points: IPoint[]) => Math.min(...points.map(val => val.y))))
+    const yMax = Math.max(...stripedChartsPoints.map((points: IPoint[]) => Math.max(...points.map(val => val.y))))
+
+    if (typeof this.yMin === 'undefined') this.yMin = yMin
+    if (typeof this.yMax === 'undefined') this.yMax = yMax
+
+    if (!this.yMinAnimation) {
+      this.yMinAnimation = new Animation(this.yMin, yMin, 150, (currentYMin: number) => {
+        this.yMin = currentYMin
+        this.coefY = this.height / Math.abs(this.yMax - this.yMin)
+        drawCharts()
+      })
+      this.yMinAnimation.tick().then(() => {
+        this.yMinAnimation = null
+      })
+    }
+
+    if (!this.yMaxAnimation) {
+      this.yMaxAnimation = new Animation(this.yMax, yMax, 150, (currentYMax: number) => {
+        this.yMax = currentYMax
+        this.coefY = this.height / Math.abs(this.yMax - this.yMin)
+        drawCharts()
+      })
+      this.yMaxAnimation.tick().then(() => {
+        this.yMaxAnimation = null
+      })
+    }
 
 
-    this.coefX = this.width / Math.abs(frameXMax - frameXMin)
-    this.coefY = this.height / Math.abs(this.yMax - this.yMin)
-    this.linearCharts.forEach((ch: LinearChart) => {
-      ch.xMin = frameXMin
-      ch.yMin = this.yMin
-      ch.coefX = this.coefX
-      ch.coefY = this.coefY
+    const drawCharts = () => {
+      this.ctx.clearRect(0, 0, this.width, this.height)
+      this.linearCharts.forEach((ch: LinearChart) => {
+        ch.xMin = this.frameXMin
+        ch.yMin = this.yMin
+        ch.coefX = this.coefX
+        ch.coefY = this.coefY
 
-      ch.draw(this.ctx)
-    })
+        ch.draw(this.ctx)
+      })
+    }
+
+
   }
 }

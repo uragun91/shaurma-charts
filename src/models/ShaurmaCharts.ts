@@ -1,5 +1,6 @@
 import { LinearChart } from "./LinearChart";
 import { LinearDrawer } from "./LinearDrawer";
+import { Animation } from "./Animation";
 
 export class ShaurmaCharts {
   private readonly chartsCanvasId = 'shaurma-charts-charts-canvas'
@@ -67,6 +68,12 @@ export class ShaurmaCharts {
     this.chartsCtx.translate(0, this.options.height)
     this.chartsCtx.scale(1, -1)
 
+    this.initEventListeners()
+
+    this.linearDrawer = new LinearDrawer(this.chartsCtx, this.options.width, this.options.height, this.left, this.right)
+  }
+
+  private initEventListeners() {
     document.addEventListener('mousedown', (event: MouseEvent) => {
       this.mousedownEventTarget = event.target as HTMLElement
     })
@@ -116,8 +123,6 @@ export class ShaurmaCharts {
         this.mousedownEventTarget = null // detach the element. This is for the case when we made mouseup outside the document (e.g. browser window)
       }
     })
-
-    this.linearDrawer = new LinearDrawer(this.chartsCtx, this.options.width, this.options.height, this.left, this.right)
   }
 
   public addChart(points: IPoint[], color: string) {
