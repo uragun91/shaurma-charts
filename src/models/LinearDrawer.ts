@@ -13,6 +13,7 @@ export class LinearDrawer {
   private coefY: number
 
   private frameXMin: number
+  private frameXMax: number
 
   private yMaxAnimation: Animation = null
   private yMinAnimation: Animation = null
@@ -42,11 +43,10 @@ export class LinearDrawer {
     this.xMax = Math.max(...this.linearCharts.map((chart: LinearChart) => Math.max(...chart.points.map(val => val.x))))
     const pointsXAxisLength = Math.abs(this.xMax - this.xMin)
 
-    const frameXMin = this.xMin + this.left / this.width * pointsXAxisLength
-    const frameXMax = this.xMin + this.right / this.width * pointsXAxisLength
-    this.frameXMin = frameXMin
+    this.frameXMin = this.xMin + this.left / this.width * pointsXAxisLength
+    this.frameXMax = this.xMin + this.right / this.width * pointsXAxisLength
 
-    this.coefX = this.width / Math.abs(frameXMax - frameXMin)
+    this.coefX = this.width / Math.abs(this.frameXMax - this.frameXMin)
 
     // y
     const stripedChartsPoints: IPoint[][] = this.linearCharts.map((chart: LinearChart) => {
@@ -54,9 +54,9 @@ export class LinearDrawer {
 
       chart.points.reduce(
         (prevPoint: IPoint, currPoint: IPoint) => {
-          if (currPoint.x >= frameXMin && currPoint.x <= frameXMax) {
+          if (currPoint.x >= this.frameXMin && currPoint.x <= this.frameXMax) {
             filtered.push(currPoint)
-          } else if (prevPoint && currPoint.x - prevPoint.x >= frameXMax - frameXMin) {
+          } else if (prevPoint && currPoint.x - prevPoint.x >= this.frameXMax - this.frameXMin) {
             // this is for the case when frame borders are between 2 points. We just push those points
             filtered.push(prevPoint)
             filtered.push(currPoint)

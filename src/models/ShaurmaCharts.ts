@@ -18,7 +18,8 @@ export class ShaurmaCharts {
   private left: number
   private right: number
 
-  private linearDrawer: LinearDrawer
+  private chartslinearDrawer: LinearDrawer
+  private frameLinearDrawer: LinearDrawer
 
   private defaults: IShaurmaOptions = {
     width: 500,
@@ -68,9 +69,14 @@ export class ShaurmaCharts {
     this.chartsCtx.translate(0, this.options.height)
     this.chartsCtx.scale(1, -1)
 
+    this.frameCtx.translate(0, 100)
+    this.frameCtx.scale(1, -1)
+
     this.initEventListeners()
 
-    this.linearDrawer = new LinearDrawer(this.chartsCtx, this.options.width, this.options.height, this.left, this.right)
+    this.chartslinearDrawer = new LinearDrawer(this.chartsCtx, this.options.width, this.options.height, this.left, this.right)
+
+    this.frameLinearDrawer = new LinearDrawer(this.frameCtx, this.options.width, 100, 0, this.options.width)
   }
 
   private initEventListeners() {
@@ -117,7 +123,7 @@ export class ShaurmaCharts {
           this.frame.style.width = `${newFrameWidth}px`
 
           this.calculateEdges()
-          this.linearDrawer.updateBorders(this.left, this.right)
+          this.chartslinearDrawer.updateBorders(this.left, this.right)
         }
       } else {
         this.mousedownEventTarget = null // detach the element. This is for the case when we made mouseup outside the document (e.g. browser window)
@@ -127,7 +133,8 @@ export class ShaurmaCharts {
 
   public addChart(points: IPoint[], color: string) {
     const chart = new LinearChart(points, color)
-    this.linearDrawer.addChart(chart)
+    this.chartslinearDrawer.addChart(chart)
+    this.frameLinearDrawer.addChart(chart)
   }
 
   private calculateEdges(): void {
